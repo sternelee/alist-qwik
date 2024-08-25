@@ -27,7 +27,7 @@ export const useFeeds = routeLoader$(
 );
 
 export const useFeedsAction = routeAction$(
-  async (data, { sharedMap, redirect }) => {
+  async (data, { sharedMap }) => {
     const { token = TOKEN } = (sharedMap.get("user") || {}) as UserSession;
     const headers = {
       Authorization: `Bearer ${token}`,
@@ -43,7 +43,7 @@ export const useFeedsAction = routeAction$(
 );
 
 export const useLinksAction = routeAction$(
-  async (data, { sharedMap, redirect }) => {
+  async (data, { sharedMap }) => {
     const { token = TOKEN } = (sharedMap.get("user") || {}) as UserSession;
     console.log(data);
     const headers = {
