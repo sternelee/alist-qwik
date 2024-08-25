@@ -45,6 +45,7 @@
     "wrangler": "^3.0.0"
   },
   "dependencies": {
+    "@unocss/reset": "^0.62.3",
     "unocss": "^0.62.3",
     "unocss-preset-extra": "^0.5.3"
   }
