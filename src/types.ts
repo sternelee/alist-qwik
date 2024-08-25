@@ -2,8 +2,7 @@ export const enum LocalStorageKey {
   THEME = "alist-theme",
 }
 
-export interface UserSession {
-  token: string;
+export interface User {
   id: string;
   name: string;
   email: string;
@@ -13,6 +12,10 @@ export interface UserSession {
   createdOn: number;
   updatedOn: number;
   userId: string;
+}
+
+export type UserSession = User & {
+  token: string;
 }
 
 export interface Result<T> {

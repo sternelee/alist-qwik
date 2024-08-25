@@ -1,10 +1,8 @@
 import { component$, useSignal } from "@builder.io/qwik";
 import { routeLoader$, routeAction$, Form } from "@builder.io/qwik-city";
 import type { DocumentHead } from "@builder.io/qwik-city";
-import { API } from "~/constant";
+import { API, TOKEN } from "~/constant";
 import { ErrResp, FeedsResp, IFeed, LinksResp, UserSession } from "~/types";
-
-const TOKEN = "10xrway8zbv23g7ox0lldspuezyb8hs6pvjisglt";
 
 const fetchFeeds = async (query: string, headers) => {
   return await fetch(`${API}/api/feeds?${query}`, { headers })
