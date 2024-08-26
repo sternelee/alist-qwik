@@ -4,28 +4,32 @@ import type { DocumentHead } from "@builder.io/qwik-city";
 import AdminTabs from "~/components/AdminTabs";
 import type { UserSession, User } from "~/types";
 
-export const useUser = routeLoader$(async ({ sharedMap, cacheControl, env }) => {
-  cacheControl({
-    staleWhileRevalidate: 60 * 60 * 24 * 7,
-    maxAge: 60,
-  });
-  const { token } = (sharedMap.get("user") || {}) as UserSession;
-  const headers = {
-    Authorization: `Bearer ${token}`,
-  };
-  const baseURL = env.get('BASE_URL');
-  const response = await fetch(`${baseURL}/auth/verify`, {
-    headers,
-  });
-  console.log('login:', response);
-
-  const user = (await response.json()) as {
-    authenticated: {
-      user: User;
+export const useUser = routeLoader$(
+  async ({ sharedMap, cacheControl, env }) => {
+    cacheControl({
+      staleWhileRevalidate: 60 * 60 * 24 * 7,
+      maxAge: 60,
+    });
+    const { bearer } = (sharedMap.get("user") || {}) as UserSession;
+    const headers = {
+      Authorization: `Bearer ${bearer}`,
     };
-  };
-  return user.authenticated.user;
-});
+    const baseURL = env.get("BASE_URL");
+    const resp = (await fetch(`${baseURL}/auth/verify`, {
+      headers,
+    }).then((res) => res.json())) as {
+      authenticated: null | {
+        user: User;
+      };
+    };
+    console.log("login:", resp);
+
+    if (resp.authenticated) {
+      return resp.authenticated.user;
+    }
+    return {} as User
+  }
+);
 
 export default component$(() => {
   const user = useUser();

@@ -23,9 +23,9 @@ export const useFeeds = routeLoader$(
       staleWhileRevalidate: 60 * 60 * 24 * 7,
       maxAge: 60,
     });
-    const { token } = (sharedMap.get("user") || {}) as UserSession;
+    const { bearer } = (sharedMap.get("user") || {}) as UserSession;
     const headers = {
-      Authorization: `Bearer ${token}`,
+      Authorization: `Bearer ${bearer}`,
     };
     const res = await fetchFeeds(
       env.get("BASE_URL") as string,
@@ -38,9 +38,9 @@ export const useFeeds = routeLoader$(
 );
 
 export const useFeedsAction = routeAction$(async (data, { sharedMap, env }) => {
-  const { token } = (sharedMap.get("user") || {}) as UserSession;
+  const { bearer } = (sharedMap.get("user") || {}) as UserSession;
   const headers = {
-    Authorization: `Bearer ${token}`,
+    Authorization: `Bearer ${bearer}`,
   };
   const resp = await fetch(`${env.get("BASE_URL")}/api/feeds`, {
     method: "POST",
@@ -52,10 +52,10 @@ export const useFeedsAction = routeAction$(async (data, { sharedMap, env }) => {
 });
 
 export const useLinksAction = routeAction$(async (data, { sharedMap, env }) => {
-  const { token } = (sharedMap.get("user") || {}) as UserSession;
+  const { bearer } = (sharedMap.get("user") || {}) as UserSession;
   console.log(data);
   const headers = {
-    Authorization: `Bearer ${token}`,
+    Authorization: `Bearer ${bearer}`,
   };
   const resp = await fetch(
     `${env.get("BASE_URL")}/api/links?feedId=${data.feedId}`,
