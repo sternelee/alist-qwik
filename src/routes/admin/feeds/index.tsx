@@ -1,61 +1,70 @@
 import { component$, useSignal } from "@builder.io/qwik";
 import { routeLoader$, routeAction$, Form } from "@builder.io/qwik-city";
 import type { DocumentHead } from "@builder.io/qwik-city";
-import { API, TOKEN } from "~/constant";
-import { ErrResp, FeedsResp, IFeed, LinksResp, UserSession } from "~/types";
+import type {
+  ErrResp,
+  FeedsResp,
+  IFeed,
+  LinksResp,
+  UserSession,
+} from "~/types";
 
-const fetchFeeds = async (query: string, headers) => {
-  return await fetch(`${API}/api/feeds?${query}`, { headers })
+const fetchFeeds = async (baseURL: string, query: string, headers) => {
+  return await fetch(`${baseURL}/api/feeds?${query}`, { headers })
     .then((res) => res.json())
     .catch((err) => {
       return err;
     });
 };
+
 export const useFeeds = routeLoader$(
-  async ({ query, sharedMap, cacheControl }) => {
+  async ({ query, sharedMap, cacheControl, env }) => {
     cacheControl({
       staleWhileRevalidate: 60 * 60 * 24 * 7,
       maxAge: 60,
     });
-    const { token = TOKEN } = (sharedMap.get("user") || {}) as UserSession;
+    const { token } = (sharedMap.get("user") || {}) as UserSession;
     const headers = {
       Authorization: `Bearer ${token}`,
     };
-    const res = await fetchFeeds(query.toString(), headers);
+    const res = await fetchFeeds(
+      env.get("API") as string,
+      query.toString(),
+      headers
+    );
     return res as FeedsResp & ErrResp;
   }
 );
 
-export const useFeedsAction = routeAction$(
-  async (data, { sharedMap }) => {
-    const { token = TOKEN } = (sharedMap.get("user") || {}) as UserSession;
-    const headers = {
-      Authorization: `Bearer ${token}`,
-    };
-    const resp = await fetch(`${API}/api/feeds`, {
-      method: "POST",
-      headers,
-      body: JSON.stringify(data),
-    }).then((res) => res.json());
-    console.log(resp);
-    return resp as IFeed & { message: string };
-  }
-);
+export const useFeedsAction = routeAction$(async (data, { sharedMap, env }) => {
+  const { token } = (sharedMap.get("user") || {}) as UserSession;
+  const headers = {
+    Authorization: `Bearer ${token}`,
+  };
+  const resp = await fetch(`${env.get("API")}/api/feeds`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(data),
+  }).then((res) => res.json());
+  console.log(resp);
+  return resp as IFeed & { message: string };
+});
 
-export const useLinksAction = routeAction$(
-  async (data, { sharedMap }) => {
-    const { token = TOKEN } = (sharedMap.get("user") || {}) as UserSession;
-    console.log(data);
-    const headers = {
-      Authorization: `Bearer ${token}`,
-    };
-    const resp = await fetch(`${API}/api/links?feedId=${data.feedId}`, {
+export const useLinksAction = routeAction$(async (data, { sharedMap, env }) => {
+  const { token } = (sharedMap.get("user") || {}) as UserSession;
+  console.log(data);
+  const headers = {
+    Authorization: `Bearer ${token}`,
+  };
+  const resp = await fetch(
+    `${env.get("API")}/api/links?feedId=${data.feedId}`,
+    {
       headers,
-    }).then((res) => res.json());
-    console.log(resp);
-    return resp as LinksResp & { message: string };
-  }
-);
+    }
+  ).then((res) => res.json());
+  console.log(resp);
+  return resp as LinksResp & { message: string };
+});
 
 export default component$(() => {
   const showLinks = useSignal(false);
@@ -78,7 +87,7 @@ export default component$(() => {
             </tr>
           </thead>
           <tbody>
-            {(feeds.value?.data || []).map((feed, index) => (
+            {(feeds.value.data || []).map((feed, index) => (
               <tr
                 key={feed.id}
                 class="hover"

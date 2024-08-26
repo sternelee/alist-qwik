@@ -3,7 +3,7 @@ import { routeLoader$ } from "@builder.io/qwik-city";
 import type { DocumentHead } from "@builder.io/qwik-city";
 import AdminTabs from "~/components/AdminTabs";
 import { API, TOKEN } from "~/constant";
-import { UserSession, User } from "~/types";
+import type { UserSession, User } from "~/types";
 
 export const useUser = routeLoader$(async ({ sharedMap, cacheControl }) => {
   cacheControl({

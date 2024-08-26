@@ -1,10 +1,9 @@
 import { component$, useSignal } from "@builder.io/qwik";
 import { routeAction$, Form } from "@builder.io/qwik-city";
 import type { DocumentHead, JSONObject } from "@builder.io/qwik-city";
-import { API } from "~/constant";
 
-const fetchLogin = async ({ email, password }: JSONObject) => {
-  return await fetch(`${API}/auth/login`, {
+const fetchLogin = async (baseURL: string, { email, password }: JSONObject) => {
+  return await fetch(`${baseURL}/auth/login`, {
     method: "POST",
     body: JSON.stringify({
       email,
@@ -17,22 +16,26 @@ const fetchLogin = async ({ email, password }: JSONObject) => {
     });
 };
 
-export const useLogin = routeAction$(async (data, { sharedMap, redirect }) => {
-  const resp = await fetchLogin(data);
-  console.log(resp);
-  if (resp.token) {
-    sharedMap.set("user", {
-      token: resp.token,
-      ...resp.data,
-    });
-    return redirect(302, "/admin");
+export const useLogin = routeAction$(
+  async (data, { sharedMap, redirect, env }) => {
+    const baseURL = env.get("API") as string;
+    const resp = await fetchLogin(baseURL, data);
+    console.log(resp);
+    if (resp.token) {
+      sharedMap.set("user", {
+        token: resp.token,
+        ...resp.data,
+      });
+      return redirect(302, "/admin");
+    }
+    return resp;
   }
-  return resp;
-});
+);
 
 export const useRegister = routeAction$(
-  async (data, { sharedMap, redirect }) => {
-    const res = await fetch(`${API}/auth/users/`, {
+  async (data, { sharedMap, redirect, env }) => {
+    const baseURL = env.get("API") as string;
+    const res = await fetch(`${baseURL}/auth/users/`, {
       method: "POST",
       body: JSON.stringify({
         name: data.name,
@@ -42,7 +45,7 @@ export const useRegister = routeAction$(
       }),
     });
     if (res.status === 201) {
-      const resp = await fetchLogin(data);
+      const resp = await fetchLogin(baseURL, data);
       if (resp.token) {
         sharedMap.set("user", {
           token: resp.token,
