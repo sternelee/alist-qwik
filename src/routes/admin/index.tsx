@@ -2,7 +2,7 @@ import { component$ } from "@builder.io/qwik";
 import { routeLoader$ } from "@builder.io/qwik-city";
 import type { DocumentHead } from "@builder.io/qwik-city";
 import AdminTabs from "~/components/AdminTabs";
-import type { UserSession, User } from "~/types";
+import type { User } from "~/types";
 
 export const useUser = routeLoader$(
   async ({ sharedMap, cacheControl, env }) => {
@@ -10,10 +10,13 @@ export const useUser = routeLoader$(
       staleWhileRevalidate: 60 * 60 * 24 * 7,
       maxAge: 60,
     });
-    const { bearer } = (sharedMap.get("user") || {}) as UserSession;
+    const user = sharedMap.get("user") || {};
+    console.log(user);
+    const bearer = user.bearer || "";
     const headers = {
       Authorization: `Bearer ${bearer}`,
     };
+    console.log("headers:", headers);
     const baseURL = env.get("BASE_URL");
     const resp = (await fetch(`${baseURL}/auth/verify`, {
       headers,
@@ -27,7 +30,7 @@ export const useUser = routeLoader$(
     if (resp.authenticated) {
       return resp.authenticated.user;
     }
-    return {} as User
+    return {} as User;
   }
 );
 

@@ -28,8 +28,9 @@ export const useLogin = routeAction$(
     if (resp.bearer) {
       sharedMap.set("user", resp);
       throw redirect(302, "/admin");
+    } else {
+      return resp;
     }
-    return resp;
   }
 );
 
@@ -50,10 +51,12 @@ export const useRegister = routeAction$(
       if (resp.bearer) {
         sharedMap.set("user", resp);
         throw redirect(302, "/admin");
+      } else {
+        return resp;
       }
-      return resp;
+    } else {
+      return await res.json();
     }
-    return await res.json();
   }
 );
 
