@@ -14,8 +14,9 @@ export interface User {
   userId: string;
 }
 
-export type UserSession = User & {
-  token: string;
+export interface UserSession {
+  bearer: string;
+  user: User
 }
 
 export interface Result<T> {

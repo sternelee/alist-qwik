@@ -2,21 +2,22 @@ import { component$ } from "@builder.io/qwik";
 import { routeLoader$ } from "@builder.io/qwik-city";
 import type { DocumentHead } from "@builder.io/qwik-city";
 import AdminTabs from "~/components/AdminTabs";
-import { API, TOKEN } from "~/constant";
 import type { UserSession, User } from "~/types";
 
-export const useUser = routeLoader$(async ({ sharedMap, cacheControl }) => {
+export const useUser = routeLoader$(async ({ sharedMap, cacheControl, env }) => {
   cacheControl({
     staleWhileRevalidate: 60 * 60 * 24 * 7,
     maxAge: 60,
   });
-  const { token = TOKEN } = (sharedMap.get("user") || {}) as UserSession;
+  const { token } = (sharedMap.get("user") || {}) as UserSession;
   const headers = {
     Authorization: `Bearer ${token}`,
   };
-  const response = await fetch(`${API}/auth/verify`, {
+  const baseURL = env.get('BASE_URL');
+  const response = await fetch(`${baseURL}/auth/verify`, {
     headers,
   });
+  console.log('login:', response);
 
   const user = (await response.json()) as {
     authenticated: {

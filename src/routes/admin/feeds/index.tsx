@@ -28,10 +28,11 @@ export const useFeeds = routeLoader$(
       Authorization: `Bearer ${token}`,
     };
     const res = await fetchFeeds(
-      env.get("API") as string,
+      env.get("BASE_URL") as string,
       query.toString(),
       headers
     );
+    console.log('feeds:', res);
     return res as FeedsResp & ErrResp;
   }
 );
@@ -41,7 +42,7 @@ export const useFeedsAction = routeAction$(async (data, { sharedMap, env }) => {
   const headers = {
     Authorization: `Bearer ${token}`,
   };
-  const resp = await fetch(`${env.get("API")}/api/feeds`, {
+  const resp = await fetch(`${env.get("BASE_URL")}/api/feeds`, {
     method: "POST",
     headers,
     body: JSON.stringify(data),
@@ -57,7 +58,7 @@ export const useLinksAction = routeAction$(async (data, { sharedMap, env }) => {
     Authorization: `Bearer ${token}`,
   };
   const resp = await fetch(
-    `${env.get("API")}/api/links?feedId=${data.feedId}`,
+    `${env.get("BASE_URL")}/api/links?feedId=${data.feedId}`,
     {
       headers,
     }

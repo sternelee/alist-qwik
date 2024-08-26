@@ -1,8 +1,12 @@
 import { component$, useSignal } from "@builder.io/qwik";
 import { routeAction$, Form } from "@builder.io/qwik-city";
 import type { DocumentHead, JSONObject } from "@builder.io/qwik-city";
+import type { UserSession, ErrResp } from "~/types";
 
-const fetchLogin = async (baseURL: string, { email, password }: JSONObject) => {
+const fetchLogin = async (
+  baseURL: string,
+  { email, password }: JSONObject
+): Promise<UserSession & ErrResp> => {
   return await fetch(`${baseURL}/auth/login`, {
     method: "POST",
     body: JSON.stringify({
@@ -18,15 +22,12 @@ const fetchLogin = async (baseURL: string, { email, password }: JSONObject) => {
 
 export const useLogin = routeAction$(
   async (data, { sharedMap, redirect, env }) => {
-    const baseURL = env.get("API") as string;
+    const baseURL = env.get("BASE_URL") as string;
     const resp = await fetchLogin(baseURL, data);
     console.log(resp);
-    if (resp.token) {
-      sharedMap.set("user", {
-        token: resp.token,
-        ...resp.data,
-      });
-      return redirect(302, "/admin");
+    if (resp.bearer) {
+      sharedMap.set("user", resp);
+      throw redirect(302, "/admin");
     }
     return resp;
   }
@@ -34,7 +35,7 @@ export const useLogin = routeAction$(
 
 export const useRegister = routeAction$(
   async (data, { sharedMap, redirect, env }) => {
-    const baseURL = env.get("API") as string;
+    const baseURL = env.get("BASE_URL") as string;
     const res = await fetch(`${baseURL}/auth/users/`, {
       method: "POST",
       body: JSON.stringify({
@@ -46,13 +47,11 @@ export const useRegister = routeAction$(
     });
     if (res.status === 201) {
       const resp = await fetchLogin(baseURL, data);
-      if (resp.token) {
-        sharedMap.set("user", {
-          token: resp.token,
-          ...resp.data,
-        });
-        return redirect(302, "/admin");
+      if (resp.bearer) {
+        sharedMap.set("user", resp);
+        throw redirect(302, "/admin");
       }
+      return resp;
     }
     return await res.json();
   }
@@ -255,6 +254,9 @@ export default component$(() => {
                   </div>
                 </Form>
               )}
+              <p>
+                {loginAction.value?.message || registerAction.value?.message}
+              </p>
             </div>
           </div>
         </div>
